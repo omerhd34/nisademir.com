@@ -17,15 +17,6 @@ model Social {
   updatedAt         DateTime @updatedAt
 }
 
-model HomeQuote {
-  id        Int    @id @default(autoincrement())
-  text      String @db.Text
-  title     String
-  book      String @default("")
-  image     String
-  sortOrder Int    @default(0)
-}
-
 model About {
   id        Int      @id @default(1)
   text1     String   @db.Text

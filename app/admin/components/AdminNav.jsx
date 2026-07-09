@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
- Home,
  UserCircle,
  Briefcase,
  BookOpen,
@@ -15,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const NAV = [
- { href: "/admin/home", label: "Ana Sayfa", icon: Home },
  { href: "/admin/about", label: "Hakkımda", icon: UserCircle },
  { href: "/admin/work", label: "Çalışma Alanları", icon: Briefcase },
  { href: "/admin/articles", label: "Yazılar", icon: BookOpen },
