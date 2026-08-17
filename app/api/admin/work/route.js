@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { adminHandler } from "@/lib/adminApi";
-import { prisma } from "@/lib/prisma";
+import { getWorkAreaRecords, saveWorkAreaRecords } from "@/lib/contentStore";
 import { revalidateWorkPage } from "@/lib/revalidatePublic";
 
 export async function GET() {
  return adminHandler(async () => {
-  const areas = await prisma.workArea.findMany({ orderBy: { sortOrder: "asc" } });
+  const areas = await getWorkAreaRecords();
   return NextResponse.json({ workAreas: areas });
  });
 }
@@ -13,24 +13,7 @@ export async function GET() {
 export async function PUT(request) {
  return adminHandler(async () => {
   const { workAreas } = await request.json();
-
-  await prisma.workArea.deleteMany();
-
-  if (Array.isArray(workAreas)) {
-   for (let i = 0; i < workAreas.length; i++) {
-    const area = workAreas[i];
-    await prisma.workArea.create({
-     data: {
-      title: area.title,
-      description: area.description,
-      icon: area.icon || "LuUser",
-      sortOrder: i,
-     },
-    });
-   }
-  }
-
-  const updated = await prisma.workArea.findMany({ orderBy: { sortOrder: "asc" } });
+  const updated = await saveWorkAreaRecords(workAreas);
   revalidateWorkPage();
   return NextResponse.json({ workAreas: updated });
  });

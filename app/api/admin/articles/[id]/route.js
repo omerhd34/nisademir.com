@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { adminHandler } from "@/lib/adminApi";
-import { prisma } from "@/lib/prisma";
+import {
+ deleteArticleRecord,
+ getArticleRecordById,
+ updateArticleRecord,
+} from "@/lib/contentStore";
 import { revalidateArticlePages } from "@/lib/revalidatePublic";
+
 function normalizeContent(content) {
  return content || "";
 }
@@ -9,9 +14,7 @@ function normalizeContent(content) {
 export async function GET(_request, { params }) {
  return adminHandler(async () => {
   const { id } = await params;
-  const article = await prisma.article.findUnique({
-   where: { id: Number(id) },
-  });
+  const article = await getArticleRecordById(id);
 
   if (!article) {
    return NextResponse.json({ error: "Yazı bulunamadı" }, { status: 404 });
@@ -26,16 +29,13 @@ export async function PUT(request, { params }) {
   const { id } = await params;
   const body = await request.json();
 
-  const article = await prisma.article.update({
-   where: { id: Number(id) },
-   data: {
-    title: body.title,
-    image: body.image,
-    excerpt: body.excerpt,
-    content: normalizeContent(body.content),
-    writer: body.writer || null,
-    category: body.category?.trim() || "Psikoloji",
-   },
+  const article = await updateArticleRecord(id, {
+   title: body.title,
+   image: body.image,
+   excerpt: body.excerpt,
+   content: normalizeContent(body.content),
+   writer: body.writer || null,
+   category: body.category?.trim() || "Psikoloji",
   });
 
   revalidateArticlePages(article.slug);
@@ -47,15 +47,8 @@ export async function PUT(request, { params }) {
 export async function DELETE(_request, { params }) {
  return adminHandler(async () => {
   const { id } = await params;
-  const article = await prisma.article.findUnique({
-   where: { id: Number(id) },
-   select: { slug: true },
-  });
-
-  await prisma.article.delete({ where: { id: Number(id) } });
-
+  const article = await deleteArticleRecord(id);
   revalidateArticlePages(article?.slug);
-
   return NextResponse.json({ success: true });
  });
 }
