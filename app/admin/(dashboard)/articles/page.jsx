@@ -1,11 +1,8 @@
-import { prisma } from "@/lib/prisma";
+import { getArticleRecords } from "@/lib/contentStore";
 import ArticlesList from "@/app/admin/components/ArticlesList";
 
 export default async function AdminArticlesPage() {
- const articles = await prisma.article.findMany({
-  orderBy: { sortOrder: "asc" },
-  select: { id: true, title: true },
- });
+ const articles = (await getArticleRecords()).map(({ id, title }) => ({ id, title }));
 
  return <ArticlesList initialArticles={articles} />;
 }

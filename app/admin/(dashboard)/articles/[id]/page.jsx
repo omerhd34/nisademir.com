@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import ArticleEditor from "@/app/admin/components/ArticleEditor";
-import { prisma } from "@/lib/prisma";
+import { getArticleRecordById } from "@/lib/contentStore";
 
 export default async function AdminEditArticlePage({ params }) {
  const { id } = await params;
@@ -10,9 +10,7 @@ export default async function AdminEditArticlePage({ params }) {
   notFound();
  }
 
- const article = await prisma.article.findUnique({
-  where: { id: articleId },
- });
+ const article = await getArticleRecordById(articleId);
 
  if (!article) {
   notFound();
