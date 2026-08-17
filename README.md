@@ -33,7 +33,7 @@ Cookie tabanlı oturum ile korunan içerik yönetimi:
 |--------|-----------|
 | Framework | [Next.js 16](https://nextjs.org/) (App Router) |
 | UI | React 19, [Tailwind CSS 4](https://tailwindcss.com/), [Radix UI](https://www.radix-ui.com/) |
-| Veritabanı | [Prisma](https://www.prisma.io/) + MySQL |
+| İçerik | JS dosyaları (`data/*.js`) — production’da Cloudinary |
 | E-posta | [Resend](https://resend.com/) |
 | İkonlar | Lucide React, React Icons |
 
@@ -48,17 +48,20 @@ nisa2/
 │   └── components/        # Paylaşılan UI bileşenleri
 ├── components/ui/         # Shadcn/Radix tabanlı temel bileşenler
 ├── context/               # React context (tema vb.)
-├── lib/                   # Prisma, auth, site verisi yardımcıları
-├── prisma/
-│   ├── schema.prisma      # Veritabanı şeması
-│   └── seed.js            # Başlangıç verisi
+├── lib/                   # Auth, site verisi ve içerik saklama yardımcıları
+├── data/
+│   ├── about.js           # Tanışalım metinleri
+│   ├── social.js          # E-posta, telefon, Instagram
+│   ├── work.js            # Çalışma alanları
+│   ├── articles.js        # Blog yazıları
+│   ├── faq.js             # Sıkça sorulan sorular
+│   └── contact.js         # Çalışma saatleri
 └── public/                # Statik dosyalar (görseller)
 ```
 
 ## Gereksinimler
 
 - **Node.js** 18.18 veya üzeri
-- **MySQL** veritabanı (yerel veya barındırılmış — örn. [Neon](https://neon.tech/), PlanetScale, Railway)
 - **Resend** hesabı ve API anahtarı (iletişim formu için)
 
 ## Kurulum
@@ -74,9 +77,6 @@ npm install
 Proje kökünde `.env` dosyası oluşturun:
 
 ```env
-# Veritabanı (MySQL)
-DATABASE_URL="mysql://KULLANICI:SIFRE@HOST:3306/VERITABANI"
-
 # Site URL (production'da zorunlu — sitemap ve SEO için)
 NEXT_PUBLIC_SITE_URL="https://ornek.com"
 
@@ -97,24 +97,7 @@ CLOUDINARY_API_SECRET="abcdefghijklmnopqrstuvwxyz"
 
 > **Not:** Geliştirme ortamında `ADMIN_*` değişkenleri tanımlanmazsa varsayılan `admin` / `admin123` kullanılır. Production'da mutlaka güçlü değerler atayın.
 
-### 3. Veritabanını hazırlayın
-
-Şemayı uygulayıp başlangıç verisini yükleyin:
-
-```bash
-npm run db:setup
-```
-
-Bu komut sırasıyla `prisma db push` ve `prisma/seed.js` çalıştırır.
-
-Alternatif olarak adım adım:
-
-```bash
-npm run db:push    # Şemayı veritabanına uygular
-npm run db:seed    # Örnek içeriği yükler
-```
-
-### 4. Geliştirme sunucusunu başlatın
+### 3. Geliştirme sunucusunu başlatın
 
 ```bash
 npm run dev
@@ -127,13 +110,9 @@ Uygulama [http://localhost:3000](http://localhost:3000) adresinde açılır. Adm
 | Komut | Açıklama |
 |-------|----------|
 | `npm run dev` | Geliştirme sunucusu (Turbopack) |
-| `npm run build` | Production derlemesi (`prisma generate` dahil) |
+| `npm run build` | Production derlemesi |
 | `npm run start` | Production sunucusu |
 | `npm run lint` | ESLint kontrolü |
-| `npm run db:generate` | Prisma client üretimi |
-| `npm run db:push` | Şemayı veritabanına senkronize eder |
-| `npm run db:seed` | Seed verisini yükler |
-| `npm run db:setup` | `db:push` + `db:seed` |
 
 ## Sayfa rotaları
 
@@ -154,10 +133,9 @@ Proje [Vercel](https://vercel.com/) veya benzeri bir platforma deploy edilebilir
 
 1. Ortam değişkenlerinin tamamını platform paneline ekleyin.
 2. `NEXT_PUBLIC_SITE_URL` değerini canlı domain ile eşleştirin (`https://www.nisademir.com`). Bu değişken sitemap, canonical URL ve Open Graph için zorunludur; ayarlanmazsa sitemap yanlış `*.vercel.app` adresleri üretebilir.
-3. `DATABASE_URL` için erişilebilir bir MySQL bağlantısı sağlayın.
-4. Resend'de gönderici domain'inizi doğrulayın; `app/api/contact/route.js` içindeki `from` adresini buna göre güncelleyin.
-5. Admin panelinden görsel yüklemek için [Cloudinary](https://cloudinary.com/) hesabı açın ve `CLOUDINARY_*` değişkenlerini ekleyin. Localhost'ta dosya diske yazılır; production'da Cloudinary kullanılır.
-6. Build komutu: `npm run build` — Start komutu: `npm run start`
+3. Resend'de gönderici domain'inizi doğrulayın; `app/api/contact/route.js` içindeki `from` adresini buna göre güncelleyin.
+4. Admin panelinden içerik kaydetmek ve görsel yüklemek için [Cloudinary](https://cloudinary.com/) hesabı açın ve `CLOUDINARY_*` değişkenlerini ekleyin. Localhost'ta içerik `data/*.js` dosyalarına, görseller diske yazılır; production'da ikisi de Cloudinary'ye kaydedilir.
+5. Build komutu: `npm run build` — Start komutu: `npm run start`
 
 `VERCEL_URL` tanımlandığında site URL'si otomatik olarak türetilir; yine de `NEXT_PUBLIC_SITE_URL` kullanımı önerilir.
 
