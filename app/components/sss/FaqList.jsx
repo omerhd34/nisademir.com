@@ -24,8 +24,8 @@ export default function FaqList({ items = [] }) {
     <Accordion type="single" collapsible className="w-full px-6 md:px-8">
      {items.map((item, index) => (
       <AccordionItem
-       key={item.id}
-       value={`faq-${item.id}`}
+       key={index}
+       value={`faq-${index}`}
        className={cn(
         'border-gray-200/80 dark:border-dark-500/40',
         index === items.length - 1 && 'border-b-0'
